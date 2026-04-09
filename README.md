@@ -12,3 +12,8 @@ Haal persoonsgegevens, organisatienamen en andere identificerende informatie uit
 ## Status
 
 Concept-fase. Bijdragen welkom.
+---
+
+## Principes
+
+Dit project volgt de [architectuur- en communityprincipes](https://github.com/security-commons-nl/.github/blob/main/PRINCIPLES.md) van security-commons-nl: EU-soevereiniteit, AI altijd adviserend, auditbaarheid by design, least privilege en open source als standaard.
