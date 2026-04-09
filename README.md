@@ -1,18 +1,14 @@
 # anonimizer
 
-AI-tool om documenten te anonimiseren voor publicatie in de commons.
+> AI-tool om documenten te anonimiseren voor publicatie in de commons.
 
-## Wat het doet
+Haal persoonsgegevens, organisatienamen en andere identificerende informatie uit documenten — zodat je interne kennis kunt delen zonder gevoelige informatie prijs te geven. De anonimizer is de enabler van de commons: alles kan publiek, zolang het geanonimiseerd is.
 
-Haal organisatienamen, persoonsnamen en andere identificerende informatie uit documenten. Vervang ze door neutrale functies en rollen — zodat je interne kennis kunt delen zonder gevoelige informatie prijs te geven.
+## Meer lezen
 
-## Hoe het werkt
-
-1. Voer een document in
-2. De AI detecteert namen, organisaties en andere diffuse elementen
-3. Per element: AI-suggestie voor vervanging + jij bevestigt of past aan
-4. Output: geanonimiseerd document klaar voor de kennisbank
+- [Concept en ontwerp](docs/concept.md) — wat het is, hoe het werkt, technische richting
+- [Bijdragen](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md)
 
 ## Status
 
-In ontwikkeling. Bijdragen welkom.
+Concept-fase. Bijdragen welkom.
