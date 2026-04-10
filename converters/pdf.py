@@ -24,15 +24,31 @@ def _is_koptekst_kandidaat(s: str) -> bool:
     return True
 
 
+_HOOFD = r'[A-Z\u00C0-\u024F]'
+_TITEL = r'[\w\s\-&/(),.\u00C0-\u024F]'
+
+
 def _heading_niveau_genummerd(s: str) -> int | None:
-    """Geef niveau voor genummerde secties, of None."""
+    """Geef niveau voor genummerde en speciaal-opgemaakte secties, of None."""
     if not _is_koptekst_kandidaat(s):
         return None
-    if re.match(r'^\d+\.\d+\.\d+\s+[A-Z\u00C0-\u024F][\w\s\-&/()\u00C0-\u024F]{1,50}$', s):
+    # Zinnen eindigen op een punt — dat zijn geen koppen
+    if s.endswith('.'):
+        return None
+    # Genummerd: 1.1.1 Titel
+    if re.match(rf'^\d+\.\d+\.\d+\s+{_HOOFD}{_TITEL}{{1,50}}$', s):
         return 4
-    if re.match(r'^\d+\.\d+\s+[A-Z\u00C0-\u024F][\w\s\-&/()\u00C0-\u024F]{1,50}$', s):
+    # Genummerd: 1.1 Titel
+    if re.match(rf'^\d+\.\d+\s+{_HOOFD}{_TITEL}{{1,50}}$', s):
         return 3
-    if re.match(r'^\d+\s+[A-Z\u00C0-\u024F][\w\s\-&/()\u00C0-\u024F]{1,60}$', s):
+    # Genummerd: 1 Titel
+    if re.match(rf'^\d+\s+{_HOOFD}{_TITEL}{{1,60}}$', s):
+        return 2
+    # Artikel-stijl: "Artikel 1 Titel" of "Artikel 1   Titel"
+    if re.match(rf'^Artikel\s+\d+\s+{_HOOFD}{_TITEL}{{1,80}}$', s, re.IGNORECASE):
+        return 2
+    # Volledig hoofdletters (document-titel of hoofdsectie): "REGELING TOEGANGSPAS"
+    if re.match(r'^[A-Z][A-Z\s\-&/()]{5,70}$', s) and s == s.upper():
         return 2
     return None
 
