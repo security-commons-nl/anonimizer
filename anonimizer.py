@@ -70,6 +70,123 @@ def interactief(entiteiten: list[dict]) -> list[dict]:
     return approved
 
 
+_HTML_TEMPLATE = """\
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{titel}</title>
+  <style>
+    *, *::before, *::after {{ box-sizing: border-box; }}
+    body {{
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 2rem 1rem;
+    }}
+    .document {{
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 3rem 4rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.12);
+    }}
+    .anonimizer-banner {{
+      font-size: .78rem;
+      color: #6b7280;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: .375rem;
+      padding: .4rem .75rem;
+      margin-bottom: 2.5rem;
+    }}
+    .anonimizer-banner a {{ color: #4b5563; }}
+    h1 {{ font-size: 1.75rem; line-height: 1.3; margin: 2rem 0 1rem; color: #111; }}
+    h2 {{ font-size: 1.35rem; line-height: 1.3; margin: 2rem 0 .75rem; color: #1a1a1a;
+          border-bottom: 2px solid #e5e7eb; padding-bottom: .35rem; }}
+    h3 {{ font-size: 1.1rem; margin: 1.5rem 0 .5rem; color: #1a1a1a; }}
+    h4 {{ font-size: 1rem; margin: 1.25rem 0 .4rem; font-weight: 600; }}
+    p {{ margin: 0 0 1rem; }}
+    ul, ol {{ margin: 0 0 1rem; padding-left: 1.5rem; }}
+    li {{ margin-bottom: .25rem; }}
+    table {{ border-collapse: collapse; width: 100%; margin: 1rem 0 1.5rem; font-size: .92rem; }}
+    th {{ background: #f3f4f6; font-weight: 600; text-align: left; }}
+    th, td {{ border: 1px solid #d1d5db; padding: .5rem .75rem; vertical-align: top; }}
+    tr:nth-child(even) td {{ background: #f9fafb; }}
+    hr {{ border: none; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }}
+    mark.placeholder {{
+      background: #fef9c3;
+      color: #713f12;
+      border-radius: .2rem;
+      padding: .05em .3em;
+      font-size: .88em;
+      font-family: ui-monospace, monospace;
+      font-style: normal;
+    }}
+    mark.placeholder-afbeelding {{
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-radius: .2rem;
+      padding: .2em .5em;
+      font-size: .88em;
+      font-family: ui-monospace, monospace;
+      display: inline-block;
+      margin: .5rem 0;
+    }}
+    @media print {{
+      body {{ background: white; padding: 0; }}
+      .document {{ box-shadow: none; padding: 0; }}
+      .anonimizer-banner {{ display: none; }}
+      mark.placeholder {{ border: 1px solid #d97706; background: #fef9c3; }}
+    }}
+    @media (max-width: 640px) {{
+      .document {{ padding: 1.5rem; }}
+    }}
+  </style>
+</head>
+<body>
+<div class="document">
+  <div class="anonimizer-banner">
+    Geanonimiseerd met <a href="https://github.com/security-commons-nl/anonimizer"
+    target="_blank" rel="noopener">anonimizer</a> &mdash; security-commons-nl.
+    Gele markering = vervangen tekst.
+  </div>
+  {body}
+</div>
+</body>
+</html>
+"""
+
+
+def _naar_html(tekst: str, bestandsnaam: str) -> str:
+    """Convert anonymised markdown to a styled standalone HTML document."""
+    import re as _re
+    html_body = md_lib.markdown(tekst, extensions=["tables"])
+
+    # Highlight [AFBEELDING VERWIJDERD]
+    html_body = _re.sub(
+        r'\[AFBEELDING VERWIJDERD\]',
+        '<mark class="placeholder-afbeelding">[AFBEELDING VERWIJDERD]</mark>',
+        html_body,
+    )
+    # Highlight all other [xxx verwijderd] placeholders
+    html_body = _re.sub(
+        r'\[([^\]]+(?:verwijderd|verwijderde)[^\]]*)\]',
+        r'<mark class="placeholder">[\1]</mark>',
+        html_body,
+        flags=_re.IGNORECASE,
+    )
+
+    return _HTML_TEMPLATE.format(
+        titel=bestandsnaam,
+        body=html_body,
+    )
+
+
 def verwerk_bestand(pad: pathlib.Path, output_pad: pathlib.Path | None = None) -> None:
     """Process a single file: convert, detect, replace, write .md + .html."""
     click.echo(f"\n{'─' * 60}")
@@ -118,6 +235,10 @@ def verwerk_bestand(pad: pathlib.Path, output_pad: pathlib.Path | None = None) -
     full_mapping = {**auto_mapping, **build_mapping(approved)}
     resultaat = apply(tekst, full_mapping)
 
+    # Second pass: re-apply standaard to catch strings introduced by memory replacements
+    if std:
+        resultaat = apply(resultaat, std)
+
     # Determine output paths
     if output_pad is None:
         md_pad = pad.parent / f"{pad.stem}-anoniem.md"
@@ -130,16 +251,7 @@ def verwerk_bestand(pad: pathlib.Path, output_pad: pathlib.Path | None = None) -
     md_pad.write_text(resultaat, encoding="utf-8")
 
     # Write .html
-    html_body = md_lib.markdown(resultaat, extensions=["tables"])
-    html_inhoud = (
-        "<!DOCTYPE html>\n"
-        "<html lang=\"nl\">\n"
-        "<meta charset=\"utf-8\">\n"
-        "<body>\n"
-        f"{html_body}\n"
-        "</body>\n"
-        "</html>"
-    )
+    html_inhoud = _naar_html(resultaat, pad.stem)
     html_pad.write_text(html_inhoud, encoding="utf-8")
 
     click.echo(f"\n  Opgeslagen:")
