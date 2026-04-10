@@ -17,15 +17,20 @@ De anonimizer lost dit op. Niet door mensen te vragen het handmatig te doen (te 
 ## Wat het doet
 
 ```
-Document in
+Document in (pdf, docx, pptx, xlsx, md, txt, html)
     ↓
-AI detecteert: namen, organisaties, e-mailadressen,
-               interne projectnamen, locaties, paden
+Laag 1: standaard-vervangingen (altijd stil, geen prompt)
+         bijv. "Leiden" → "VOORBEELDGEMEENTE"
     ↓
-Per element: AI-suggestie voor vervanging
-             + jij bevestigt, past aan, of slaat over
+Laag 2: eerder bevestigde vervangingen uit geheugen (stil)
     ↓
-Geanonimiseerd document uit
+Laag 3: AI detecteert nieuwe entiteiten — namen, e-mails,
+         organisaties, projectnamen, interne nummers
+    ↓
+Per nieuw element: AI-suggestie voor vervanging
+                   + jij bevestigt, past aan, of slaat over
+    ↓
+Geanonimiseerd document uit (.md + .html)
 ```
 
 **Voorbeelden van vervangingen:**
@@ -33,24 +38,23 @@ Geanonimiseerd document uit
 | Origineel | Suggestie | Jij kiest |
 |-----------|-----------|-----------|
 | Jan de Vries | de CISO | bevestigen / aanpassen |
-| Gemeente X | de gemeente | bevestigen / aanpassen |
+| Leiden | VOORBEELDGEMEENTE | automatisch (standaard) |
 | j.devries@gemeentex.nl | [e-mailadres verwijderd] | bevestigen / aanpassen |
-| het programma | het weerbaarheidsprogramma | bevestigen / aanpassen |
-| C:\Users\Bas.Stevens\... | [pad verwijderd] | bevestigen / aanpassen |
+| het programma X | het weerbaarheidsprogramma | bevestigen / aanpassen |
 
 ---
 
 ## Interactiemodel
 
-De anonimizer is **interactief, niet blind**. Elk gedetecteerd element wordt voorgelegd:
+De anonimizer is **interactief, niet blind**. Elk nieuw gedetecteerd element wordt voorgelegd:
 
 ```
-[1/12] Gevonden: "Jan de Vries"
-       Suggestie: "de CISO"
-       > (Enter = akkoord, typ alternatief, s = overslaan, q = stop)
+[1/8] Persoon: "Jan de Vries"
+      Suggestie: "de CISO"
+      > (Enter = akkoord, eigen tekst = alternatief, s = overslaan, q = stop)
 ```
 
-Dit is bewust. Een batch-vervanging die je niet controleert, is een vervanging die je niet vertrouwt. De mens blijft in de loop.
+Eenmaal bevestigde vervangingen worden onthouden in `memory.json`. Bij een volgend document worden ze automatisch toegepast — geen prompt meer.
 
 ---
 
@@ -60,50 +64,58 @@ Dit is bewust. Een batch-vervanging die je niet controleert, is een vervanging d
 |---------|--------------|
 | Plain text (.txt) | Fase 1 |
 | Markdown (.md) | Fase 1 |
-| Word (.docx) | Fase 2 |
-| PDF (tekst-extractie) | Fase 2 |
+| HTML (.html, .htm) | Fase 1 |
+| Word (.docx) | Fase 1 |
+| PDF (tekst-extractie) | Fase 1 |
+| PowerPoint (.pptx) | Fase 1 |
+| Excel (.xlsx) | Fase 1 |
+
+Afbeeldingen (logo's, covers) worden verwijderd en vervangen door `[AFBEELDING VERWIJDERD]`.
+
+**Output:** altijd zowel `.md` als `.html`.
 
 ---
 
 ## Technische richting
 
-**Detectie:** LLM-gestuurde Named Entity Recognition (NER). Het model identificeert niet alleen namen en e-mailadressen, maar ook contextafhankelijke elementen als interne projectnamen en afdelingsnamen die een regex nooit zou vinden.
+**Detectie (3 lagen):**
+1. Standaard-vervangingen uit `standaard.yaml` — configureerbaar per organisatie, altijd stil
+2. Geleerd geheugen uit `memory.json` — vorige sessies onthouden
+3. LLM-gestuurde Named Entity Recognition — contextafhankelijk, voor alles wat nog niet bekend is
 
-**Suggesties:** hetzelfde model stelt een neutrale vervanging voor op basis van context. "Jan de Vries" wordt "de CISO" omdat de context aangeeft dat hij CISO is — niet omdat er een vaste regel is.
+**Model:** lokaal via Ollama of EU-gehoste API (Mistral). Geen data buiten de EU.
 
-**Output:** gestructureerde diff (JSON) van origineel naar geanonimiseerd. Dit maakt het mogelijk om de vervangingen te reviewen, te exporteren, en eventueel opnieuw toe te passen op een bijgewerkt document.
-
-**Model:** lokaal via Ollama of EU-gehoste API. Geen data buiten de EU.
+**Output:** gestructureerde Markdown + HTML, klaar voor publicatie in de kennisbank.
 
 ---
 
 ## Interface
 
-**Fase 1: CLI**
-
-Laagste drempel voor technische bijdragers. Werkt op elk systeem met Python.
+**CLI**
 
 ```bash
-anonimizer verwerk document.md
-anonimizer verwerk --batch map/
+# Een document
+python anonimizer.py verwerk document.pdf
+
+# Hele map
+python anonimizer.py verwerk map/ --batch
 ```
-
-**Fase 2: Web UI**
-
-Voor niet-technische gebruikers (beleidsmedewerkers, communicatieadviseurs). Upload, klik door de suggesties, download het resultaat.
 
 ---
 
-## Integratie met de kennisbank
+## CI-integratie: adviserende privacy scan
 
-Na anonimisering kan het document direct worden toegevoegd aan de kennisbank van security-commons-nl. De anonimizer kent de mapstructuur (`security/`, `privacy/`, `bcm/`, `overig/`) en stelt een bestemmingsmap voor op basis van de inhoud.
+De kennisbank bevat een GitHub Action die bij elke Pull Request de ingediende `.md`-bestanden scant met dezelfde LLM-detector. De action **blokkeert nooit** — ze plaatst een adviserende comment voor de reviewer:
+
+> "Let bij het reviewen op regel 42 ('het BRP-project') en regel 105 ('Contactpersoon R. Visser')."
+
+Dit is bewust in lijn met het principe: **AI altijd adviserend, mens beslist.**
 
 ---
 
 ## Status
 
-Concept-fase. Er is nog geen werkende implementatie.
+Fase 1 — CLI voor alle gangbare documentformaten (.pdf, .docx, .pptx, .xlsx, .md, .txt, .html).
+Fase 2 voegt een web UI toe voor niet-technische gebruikers.
 
-Bijdragen welkom — zowel aan de technische uitwerking (NER-aanpak, CLI-interface, model-keuze) als aan testdocumenten en use cases.
-
-Zie [CONTRIBUTING.md](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md).
+Bijdragen welkom — zie [CONTRIBUTING.md](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md).

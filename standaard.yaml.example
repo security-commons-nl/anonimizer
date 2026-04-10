@@ -1,0 +1,18 @@
+# Standaard-vervangingen — altijd automatisch toegepast, geen prompt
+# Kopieer dit bestand naar standaard.yaml en pas aan voor jouw organisatie.
+# standaard.yaml is gitignored (lokaal per installatie).
+
+vervangingen:
+  # Gemeentenamen
+  "Gemeente Leiden": "VOORBEELDGEMEENTE"
+  "Leiden": "VOORBEELDGEMEENTE"
+  "Leiderdorp": "VOORBEELDGEMEENTE"
+  "Oegstgeest": "VOORBEELDGEMEENTE"
+  "Zoeterwoude": "VOORBEELDGEMEENTE"
+
+  # Samenwerkingsverbanden
+  "Holland Rijnland": "VOORBEELDREGIO"
+  "Leidse Regio": "VOORBEELDREGIO"
+
+  # Interne afdeling/dienst
+  "IB&P": "VOORBEELDDIENST"
