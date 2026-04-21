@@ -10,6 +10,7 @@ Gebruik:
 """
 import sys
 import os
+import json
 import pathlib
 import click
 
@@ -200,8 +201,15 @@ def _naar_html(tekst: str, bestandsnaam: str) -> str:
     )
 
 
-def verwerk_bestand(pad: pathlib.Path, output_pad: pathlib.Path | None = None) -> None:
-    """Process a single file: convert, detect, replace, write .md + .html."""
+def verwerk_bestand(
+    pad: pathlib.Path,
+    output_pad: pathlib.Path | None = None,
+    dry_run: bool = False,
+) -> None:
+    """Process a single file: convert, detect, replace, write .md + .html.
+
+    In dry_run modus: alleen detectie, geen wegschrijven, JSON-rapport op stdout.
+    """
     click.echo(f"\n{'─' * 60}")
     click.echo(f"  Bestand: {click.style(str(pad), bold=True)}")
 
@@ -225,9 +233,24 @@ def verwerk_bestand(pad: pathlib.Path, output_pad: pathlib.Path | None = None) -
     # Detect (3 layers)
     auto_mapping, new_entities = detect(tekst, mem, std)
 
+    # --- dry-run: rapporteer en stop ---
+    if dry_run:
+        rapport = {
+            "bestand": str(pad),
+            "tekens": len(tekst),
+            "auto_mapping": [
+                {"tekst": orig, "vervanging": repl}
+                for orig, repl in sorted(auto_mapping.items())
+            ],
+            "llm_entiteiten": new_entities,
+            "totaal": len(auto_mapping) + len(new_entities),
+        }
+        click.echo(json.dumps(rapport, ensure_ascii=False, indent=2))
+        return
+
     # Show auto-applied
     if auto_mapping:
-        click.echo(f"  Automatisch toegepast: {len(auto_mapping)} vervanging(en) (standaard + geheugen)")
+        click.echo(f"  Automatisch toegepast: {len(auto_mapping)} vervanging(en) (standaard + geheugen + patroon)")
         for orig, repl in sorted(auto_mapping.items()):
             click.echo(f"    - \"{orig}\" -> \"{repl}\"")
 
@@ -285,7 +308,9 @@ def cli():
               help="Uitvoerbestand (standaard: <naam>-anoniem.md + .html)")
 @click.option("--batch", is_flag=True,
               help="Verwerk alle ondersteunde bestanden in een map")
-def verwerk(pad, output, batch):
+@click.option("--dry-run", is_flag=True,
+              help="Toon alleen detecties als JSON, schrijf geen output")
+def verwerk(pad, output, batch, dry_run):
     """Verwerk een document of map en verwijder identificerende informatie interactief.
 
     Ondersteunde formaten: .md, .txt, .html, .htm, .docx, .pdf, .pptx, .xlsx
@@ -314,13 +339,13 @@ def verwerk(pad, output, batch):
 
         click.echo(f"{len(bestanden)} bestand(en) gevonden.")
         for bestand in bestanden:
-            verwerk_bestand(bestand)
+            verwerk_bestand(bestand, dry_run=dry_run)
 
         click.echo(f"\n{'=' * 60}")
         click.echo("Klaar.")
     else:
         output_pad = pathlib.Path(output) if output else None
-        verwerk_bestand(pad, output_pad)
+        verwerk_bestand(pad, output_pad, dry_run=dry_run)
 
 
 if __name__ == "__main__":

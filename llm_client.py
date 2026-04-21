@@ -14,7 +14,7 @@ def chat(messages: list[dict], response_format: str = "text") -> str:
     payload = {
         "model": model,
         "messages": messages,
-        "temperature": 0.1,
+        "temperature": 0,
     }
     if response_format == "json":
         payload["response_format"] = {"type": "json_object"}
