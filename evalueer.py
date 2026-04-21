@@ -94,6 +94,19 @@ def detecteer(
         except Exception as e:
             print(f"  ⚠ LLM-laag overgeslagen: {e}", file=sys.stderr)
 
+    # Laag 3.5: anafoor-expansie (losse voornamen bij detected personen)
+    from detector import voeg_anaforen_toe
+    metadata = (mem if gebruik_memory else []) + llm_ent
+    alle_potentieel = {
+        **auto_mapping,
+        **{e["tekst"]: e.get("suggestie", "") for e in llm_ent},
+    }
+    _, anafoor_map = voeg_anaforen_toe(alle_potentieel, metadata, tekst)
+    for k, v in anafoor_map.items():
+        if k not in auto_mapping:
+            auto_mapping[k] = v
+            bron[k] = "anafoor"
+
     return auto_mapping, llm_ent, bron
 
 

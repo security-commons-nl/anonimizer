@@ -11,6 +11,7 @@ Drie-laagse detectie:
 import json
 from llm_client import chat
 from patronen import detect_patronen
+from anafoor import expand_persoon_mappings
 
 
 # Allowlist: exacte strings die nooit vervangen mogen worden, ongeacht wat
@@ -217,3 +218,31 @@ def detect(
     ]
 
     return auto_mapping, new_entities, bron
+
+
+def voeg_anaforen_toe(
+    mapping: dict[str, str],
+    entiteiten_metadata: list[dict],
+    tekst: str,
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Verrijk een mapping met losse voornaam-verwijzingen (Fase E1).
+
+    Args:
+        mapping: {origineel: vervanging} — huidige actieve mapping
+        entiteiten_metadata: lijst van {tekst, categorie, ...} waarmee we
+            weten welke keys 'persoon' zijn. Komt uit memory + approved/LLM.
+        tekst: documenttekst
+
+    Returns:
+        (uitgebreide_mapping, anafoor_mapping)
+        uitgebreide_mapping bevat alles uit mapping + gevonden anaforen
+        anafoor_mapping bevat alleen de nieuw toegevoegde voornaam→vervanging
+    """
+    categorieën = {
+        e.get("tekst", ""): e.get("categorie", "")
+        for e in entiteiten_metadata
+        if e.get("tekst")
+    }
+    uitgebreid = expand_persoon_mappings(mapping, categorieën, tekst)
+    anafoor_mapping = {k: v for k, v in uitgebreid.items() if k not in mapping}
+    return uitgebreid, anafoor_mapping
