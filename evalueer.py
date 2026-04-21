@@ -224,6 +224,10 @@ def main():
     p.add_argument("--no-memory", action="store_true", help="Sla memory.json over (toon pure regex+standaard)")
     p.add_argument("--no-standaard", action="store_true", help="Sla standaard.yaml over")
     p.add_argument("--json", type=pathlib.Path, help="Schrijf JSON-rapport naar bestand")
+    p.add_argument("--min-precision", type=float, default=None,
+                   help="Exit code 1 als totale precision hieronder zakt (bv. 1.0 voor offline-CI)")
+    p.add_argument("--min-recall", type=float, default=None,
+                   help="Exit code 1 als totale recall hieronder zakt")
     args = p.parse_args()
 
     _laad_env()
@@ -287,6 +291,17 @@ def main():
     if args.json:
         args.json.write_text(json.dumps(rapporten, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\nRapport opgeslagen: {args.json}")
+
+    # Threshold-check voor CI: faal als metrics onder drempel zakken
+    if totaal_tp + totaal_fn > 0:
+        p_tot = totaal_tp / (totaal_tp + totaal_fp) if (totaal_tp + totaal_fp) > 0 else 0
+        r_tot = totaal_tp / (totaal_tp + totaal_fn) if (totaal_tp + totaal_fn) > 0 else 0
+        if args.min_precision is not None and p_tot < args.min_precision:
+            print(f"\n❌ Precision {p_tot:.3f} < drempel {args.min_precision}", file=sys.stderr)
+            sys.exit(1)
+        if args.min_recall is not None and r_tot < args.min_recall:
+            print(f"\n❌ Recall {r_tot:.3f} < drempel {args.min_recall}", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

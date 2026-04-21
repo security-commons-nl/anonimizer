@@ -12,6 +12,47 @@ def _has_image(paragraph) -> bool:
     return False
 
 
+def _extract_tekstvakken(doc) -> list[str]:
+    """Verzamel tekst uit text frames / tekstvakken (w:txbxContent).
+
+    python-docx doorloopt standaard alleen hoofd-paragrafen en tabellen —
+    tekst in text frames (drawings, shapes, callouts) wordt gemist. Voor
+    gemeentelijke documenten bevatten tekstvakken vaak colofons met
+    contactgegevens (adres, telefoon, e-mail).
+    """
+    teksten: list[str] = []
+    # Zoek in document body, headers en footers
+    bronnen = [doc.element.body]
+    for section in doc.sections:
+        if section.header is not None:
+            bronnen.append(section.header._element)
+        if section.footer is not None:
+            bronnen.append(section.footer._element)
+
+    for bron in bronnen:
+        for txbx in bron.iter(qn("w:txbxContent")):
+            # Verzamel alle w:t elementen binnen dit tekstvak
+            onderdelen = [t.text or "" for t in txbx.iter(qn("w:t"))]
+            tekst = "".join(onderdelen).strip()
+            if tekst:
+                teksten.append(tekst)
+    return teksten
+
+
+def _extract_header_footer_tekst(doc) -> list[str]:
+    """Verzamel hoofdtekst (buiten tekstvakken) uit headers en footers."""
+    teksten: list[str] = []
+    for section in doc.sections:
+        for container in (section.header, section.footer):
+            if container is None:
+                continue
+            for para in container.paragraphs:
+                t = para.text.strip()
+                if t:
+                    teksten.append(t)
+    return teksten
+
+
 def _heading_level(paragraph) -> int:
     """Return heading level 1-6, or 0 if not a heading."""
     name = paragraph.style.name or ""
@@ -76,5 +117,13 @@ def docx_to_markdown(pad: pathlib.Path) -> str:
                 parts.append("#" * level + " " + tekst)
             else:
                 parts.append(tekst)
+
+    # Voeg tekst uit headers/footers en tekstvakken toe.
+    # Deze worden door python-docx niet meegenomen in doc.element.body-iteratie,
+    # maar bevatten in gemeentelijke documenten vaak contactgegevens.
+    extra_blokken = _extract_header_footer_tekst(doc) + _extract_tekstvakken(doc)
+    if extra_blokken:
+        parts.append("")  # scheiding
+        parts.extend(extra_blokken)
 
     return "\n\n".join(parts)
