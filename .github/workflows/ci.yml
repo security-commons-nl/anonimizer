@@ -7,35 +7,33 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
+  # Standaard Python-tests via herbruikbare workflow in security-commons-nl/.github
+  tests:
+    uses: security-commons-nl/.github/.github/workflows/python-ci.yml@main
+    with:
+      python-version: "3.12"
+      test-command: "pytest tests/ -v"
 
+  # Documentatie-compliance conform DOCUMENTATION-STANDARD.md
+  docs:
+    uses: security-commons-nl/.github/.github/workflows/doc-compliance.yml@main
+    with:
+      require-gebruik: false         # anonimizer heeft docs/handleiding.md (CLI-tool)
+      require-architectuur: false    # docs/concept.md dient als architectuur
+      require-configuratie: false
+
+  # Anonimizer-specifieke regressie: de regex-laag moet 100% precision houden
+  evalueer:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
           cache: pip
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
-
-      - name: Run unit tests
-        run: pytest tests/ -v
-
-      - name: Regressie-evaluatie (alleen op gecommitte testdocumenten, offline)
-        run: |
-          # Alleen synth-edge-cases.md staat in git — echte testdocumenten
-          # zijn gitignored (bevatten echte PII). De --offline vlag slaat
-          # de LLM-laag over zodat geen API-sleutel nodig is.
-          # --min-precision 1.0: de regex-laag mag nooit false positives
-          # introduceren, dat is de hele belofte van deterministische detectie.
-          python evalueer.py testset/ --offline --no-memory --min-precision 1.0
+      - name: Regressie-evaluatie (offline, geen LLM-credits)
+        run: python evalueer.py testset/ --offline --no-memory --min-precision 1.0
