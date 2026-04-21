@@ -4,6 +4,7 @@ __pycache__/
 .claude/
 .codesight/
 memory.json
+memory.json.bak
 standaard.yaml
 testset/*
 !testset/README.md
