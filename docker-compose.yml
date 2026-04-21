@@ -1,0 +1,13 @@
+services:
+  anonimizer:
+    build: .
+    image: anonimizer:latest
+    container_name: anonimizer
+    env_file: .env
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./data:/app/data
+      - ./memory.json:/app/memory.json
+      - ./standaard.yaml:/app/standaard.yaml:ro
+    working_dir: /app

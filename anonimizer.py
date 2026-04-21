@@ -12,6 +12,12 @@ import sys
 import os
 import pathlib
 import click
+
+# Force UTF-8 on stdout/stderr so Windows cp1252 consoles don't crash on
+# box-drawing characters (─, →) used in our output.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 import markdown as md_lib
 from converter import to_markdown, ONDERSTEUNDE_EXTENSIES
 from detector import detect
@@ -37,6 +43,13 @@ CATEGORIE_LABELS = {
 def interactief(entiteiten: list[dict]) -> list[dict]:
     """Loop through detected entities and let user confirm/adjust/skip each."""
     if not entiteiten:
+        return []
+
+    if not sys.stdin.isatty():
+        click.echo(
+            f"\n  Gevonden: {len(entiteiten)} nieuw element(en) — overgeslagen "
+            "(geen interactieve terminal). Alleen auto-vervangingen toegepast.\n"
+        )
         return []
 
     click.echo(f"\n  Gevonden: {len(entiteiten)} nieuw element(en).\n")

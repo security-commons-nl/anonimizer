@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+.claude/
+.codesight/
+.cursorrules
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+docs/
+data/
+memory.json
+Dockerfile
+docker-compose.yml
+.dockerignore
