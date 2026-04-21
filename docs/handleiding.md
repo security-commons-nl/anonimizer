@@ -11,9 +11,10 @@ Deze handleiding gaat ervan uit dat je de tool al geïnstalleerd hebt. Zo niet, 
 1. [Voor je begint](#voor-je-begint)
 2. [Een document stap voor stap](#een-document-stap-voor-stap)
 3. [De redactionele keuze — wat vervang ik waarmee?](#de-redactionele-keuze)
-4. [Output reviewen](#output-reviewen)
-5. [Troubleshooting](#troubleshooting)
-6. [Van schoon document naar kennisbank-PR](#van-schoon-document-naar-kennisbank-pr)
+4. [Wat gebeurt er met afbeeldingen en layout?](#wat-gebeurt-er-met-afbeeldingen-en-layout)
+5. [Output reviewen](#output-reviewen)
+6. [Troubleshooting](#troubleshooting)
+7. [Van schoon document naar kennisbank-PR](#van-schoon-document-naar-kennisbank-pr)
 
 ---
 
@@ -116,6 +117,45 @@ Kritisch — vaak vergeten.
 - Adressen: `Stadhuisplein 1` → `[adres hoofdkantoor]`
 - Dossiernummers, kenmerken: `Z/24/123456` → `[dossierkenmerk]`
 - Datums: meestal laten staan (niet identificerend), tenzij het over een specifiek incident gaat dat herleidbaar is
+
+---
+
+## Wat gebeurt er met afbeeldingen en layout?
+
+**Belangrijk om te weten voor je begint — anders verwacht je iets anders dan je krijgt.**
+
+De tool werkt op **tekst**, niet op beeld. Voor elk ondersteund formaat (PDF, DOCX, PPTX, XLSX) wordt de tekst eruit getrokken en omgezet naar Markdown. Afbeeldingen — elk plaatje, elk logo, elke screenshot, elk diagram — worden **verwijderd** en vervangen door een `[AFBEELDING VERWIJDERD]`-marker in de tekst.
+
+### Wat dat betekent per formaat
+
+| Bronbestand | Wat er gebeurt |
+|---|---|
+| **PPTX** (PowerPoint) | Volledig ondersteund. Tekst per slide wordt als `## Slide 1`, `## Slide 2`, etc. in Markdown gezet. Titels, bullets en textboxen gaan door de anonimizer. Afbeeldingen, logo's, huisstijl-achtergronden verdwijnen |
+| **DOCX** (Word) | Alle tekst (paragrafen, tabellen, koppen) behouden. Afbeeldingen eruit |
+| **PDF** | Tekst eruit getrokken. Afbeeldingen eruit — inclusief diagrammen die eigenlijk plaatjes zijn |
+| **XLSX** (Excel) | Celinhoud wordt tekst. Geen grafieken, geen opmaak |
+
+### Wat de tool *niet* doet
+
+- ❌ **Geen OCR** — tekst die alléén op een afbeelding staat (bv. een screenshot van een Outlook-venster) wordt dus niet gescand. De afbeelding verdwijnt compleet, inclusief de info erop
+- ❌ **Geen logo-verwijdering in het origineel** — als je de originele PPTX met huisstijl wilt delen, moet je zelf in PowerPoint de slide-master aanpassen
+- ❌ **Geen achtergrond-scrubbing** — interne templates blijven in het origineel staan
+- ❌ **Geen blur of redact op foto's** — persoonsfoto's verdwijnen volledig, ze worden niet onherkenbaar gemaakt
+- ❌ **Geen diagram-herkenning** — tekst binnen Visio-achtige diagrammen wordt niet geanonimiseerd
+
+### Wat je zelf moet doen als afbeeldingen belangrijk zijn
+
+Als je document zonder beeldmateriaal onbegrijpelijk wordt (bv. architectuurplaten, screenshots die het verhaal dragen), is dit de volgorde:
+
+1. **Eerst handmatig het origineel schonen:**
+   - PowerPoint-template vervangen door iets neutraals
+   - Logo's uit slide-master verwijderen
+   - Screenshots croppen, blurren of uitknippen tot alleen het relevante deel overblijft
+   - Persoonsfoto's verwijderen of vervangen
+2. **Dan pas door de anonimizer** voor de tekstuele laag
+3. **Voeg de geschoonde afbeeldingen apart toe** aan je kennisbank-PR naast het `.md`-bestand — of verwijs naar ze vanuit de Markdown met `![omschrijving](pad/naar/afbeelding.png)`
+
+**Korte versie:** deze tool is gemaakt om **kennis te delen, niet layout.** Output is altijd kale Markdown. Accepteer dat of bewerk zelf het origineel vóór je hem aanbiedt.
 
 ---
 
