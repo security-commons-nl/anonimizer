@@ -1,0 +1,14 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "Bas Stevens", "categorie": "persoon"},
+    {"tekst": "Ab Errami", "categorie": "persoon"},
+    {"tekst": "Zivver", "categorie": "organisatie"},
+    {"tekst": "BDO", "categorie": "organisatie"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "CISO", "FG", "AVG", "ICT", "WGBO",
+    "Chief Information Security Officer",
+    "Functionaris Gegevensbescherming",
+    "Algemene Verordening Gegevensbescherming"
+  ]
+}

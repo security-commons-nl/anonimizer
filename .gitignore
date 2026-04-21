@@ -5,3 +5,6 @@ __pycache__/
 .codesight/
 memory.json
 standaard.yaml
+testset/*
+!testset/README.md
+!testset/*.groundtruth.json

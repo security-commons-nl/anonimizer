@@ -1,0 +1,15 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "Rudolf Kroes", "categorie": "persoon"},
+    {"tekst": "Marc Hennen", "categorie": "persoon"},
+    {"tekst": "Emma Bouwman", "categorie": "persoon"},
+    {"tekst": "Rozemarijn Smink", "categorie": "persoon"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "AVG", "CISO", "FG", "CIO",
+    "Autoriteit Persoonsgegevens",
+    "Data Protection",
+    "Privacy Officer"
+  ],
+  "opmerking": "Henriëtte Tans komt ook voor maar verschijnt als 'Henri�tte' door PDF-encoding; zie case #5 plan-aanscherping.md"
+}

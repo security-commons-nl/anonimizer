@@ -1,0 +1,13 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "Khalid", "categorie": "persoon"},
+    {"tekst": "Frank", "categorie": "persoon"},
+    {"tekst": "Arctic Wolf", "categorie": "organisatie"},
+    {"tekst": "Openline", "categorie": "organisatie"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "CISO", "ISO", "IBD", "CTD", "IT", "SaaS", "MDR",
+    "Informatiebeveiligingsdienst",
+    "Root Cause Analysis"
+  ]
+}

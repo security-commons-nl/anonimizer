@@ -1,0 +1,22 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "Bart Kock", "categorie": "persoon"},
+    {"tekst": "Dimitri Ijzerman", "categorie": "persoon"},
+    {"tekst": "gegevensbescherming@leidse-regio.nl", "categorie": "email"},
+    {"tekst": "KVK 27364192", "categorie": "nummer"},
+    {"tekst": "KVK 27364127", "categorie": "nummer"},
+    {"tekst": "KVK 50025929", "categorie": "nummer"},
+    {"tekst": "KVK 27363529", "categorie": "nummer"},
+    {"tekst": "FG 000424", "categorie": "nummer"},
+    {"tekst": "FG 000422", "categorie": "nummer"},
+    {"tekst": "FG 000426", "categorie": "nummer"},
+    {"tekst": "FG 000420", "categorie": "nummer"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "Naam", "Telefoonnummer", "E-mail", "Organisatie",
+    "Geslacht", "Geboortedatum", "Adres", "Bankrekeningnummer",
+    "AVG", "AP", "Wpg", "FG", "ISO", "CISO",
+    "Autoriteit Persoonsgegevens",
+    "Topdesk", "JOIN", "Sharepoint"
+  ]
+}

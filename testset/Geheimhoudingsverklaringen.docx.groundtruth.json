@@ -1,0 +1,14 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "2514 JS", "categorie": "locatie"},
+    {"tekst": "070 373 80 11", "categorie": "telefoon"},
+    {"tekst": "incident@IBDGemeenten.nl", "categorie": "email"},
+    {"tekst": "info@IBDGemeenten.nl", "categorie": "email"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "IBD", "VNG", "BIO", "Den Haag",
+    "Vereniging van Nederlandse Gemeenten",
+    "Informatiebeveiligingsdienst voor gemeenten",
+    "Nationaal Cyber Security Centrum"
+  ]
+}

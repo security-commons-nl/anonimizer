@@ -1,0 +1,12 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "http://virtueel.servicepunt71.nl/", "categorie": "organisatie"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "VSP", "BYOD",
+    "Bring Your Own Device",
+    "Microsoft Teams",
+    "Servicedesk ICT"
+  ],
+  "opmerking": "Document bevat geen persoonsnamen. URL naar intern portaal is wel org-specifiek."
+}

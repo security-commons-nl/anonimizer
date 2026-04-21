@@ -26,6 +26,19 @@ Zie [anonimizer-web](https://github.com/security-commons-nl/anonimizer-web) voor
 
 ---
 
+## Fase 3.5 — Detectiekwaliteit op harde gevallen
+
+Zie [docs/plan-aanscherping.md](docs/plan-aanscherping.md) voor het volledige plan.
+
+Samenvatting in volgorde van uitvoering:
+- **A** — Kwaliteit verifieerbaar maken: ground-truth, `--dry-run`, `evalueer.py`, CI
+- **B** — Deterministische regex-laag voor KVK/FG/BSN/IBAN/postcode/telefoon/email
+- **C** — LLM-prompt aanscherpen: formulierlabels behouden, losse voornamen, publieke-organisatie-allowlist
+- **D** — Robuustheid: word-boundary voor korte keys, PDF-mojibake-detectie, audit-trail per vervanging
+- **E** — Contextuele beslissingen: anafoor-linking, rol-contextualisering *(alleen als nodig)*
+
+---
+
 ## Fase 3 — Uitbreidingen
 
 - [ ] CI-scanner stabiliseren — robuustere foutafhandeling, betere output bij geen bevindingen

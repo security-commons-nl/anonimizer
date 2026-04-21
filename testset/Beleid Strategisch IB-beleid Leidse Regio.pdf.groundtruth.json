@@ -1,0 +1,10 @@
+{
+  "moet_gedetecteerd": [],
+  "moet_niet_gedetecteerd": [
+    "CISO", "CIO", "ISO", "FG", "AVG", "BIO",
+    "Chief Information Security Officer",
+    "Baseline Informatiebeveiliging Overheid",
+    "Basisregistratie Personen"
+  ],
+  "opmerking": "Document bevat vooral rollen/functies zonder gekoppelde namen. Gemeentenamen worden via standaard.yaml afgehandeld."
+}
