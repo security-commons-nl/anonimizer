@@ -41,3 +41,64 @@ def remember(tekst: str, vervanging: str, categorie: str, replacements: list[dic
             return replacements
     replacements.append({"tekst": tekst, "vervanging": vervanging, "categorie": categorie})
     return replacements
+
+
+def detecteer_conflicten(
+    replacements: list[dict],
+    standaard: dict[str, str],
+) -> list[dict]:
+    """Vind conflicten binnen en tussen memory en standaard.
+
+    Retourneert een lijst met {type, items, bericht} voor elke gevonden kwestie.
+    Wordt bij startup getoond als waarschuwing, blokkeert niet.
+
+    Gedetecteerde conflicttypes:
+      - dubbele_key: zelfde tekst in zowel memory als standaard
+      - substring: een key is substring van een langere key (risico op
+        cascade-vervanging)
+      - mojibake: key bevat U+FFFD-karakter (geheugenvervuiling)
+    """
+    conflicten: list[dict] = []
+
+    mem_keys = {item.get("tekst", ""): item for item in replacements if item.get("tekst")}
+    std_keys = set(standaard.keys())
+
+    # Type 1: dubbele key in memory en standaard
+    overlap = set(mem_keys.keys()) & std_keys
+    for key in overlap:
+        mem_val = mem_keys[key].get("vervanging", "")
+        std_val = standaard[key]
+        if mem_val != std_val:
+            conflicten.append({
+                "type": "dubbele_key",
+                "key": key,
+                "memory_vervanging": mem_val,
+                "standaard_vervanging": std_val,
+                "bericht": f"Key {key!r} staat in zowel memory als standaard met verschillende vervangingen",
+            })
+
+    # Type 2: substring-relatie binnen alle keys
+    alle_keys = sorted(set(mem_keys.keys()) | std_keys, key=len)
+    for i, kort in enumerate(alle_keys):
+        if len(kort) < 3:
+            continue
+        for lang in alle_keys[i + 1:]:
+            if kort != lang and kort in lang:
+                conflicten.append({
+                    "type": "substring",
+                    "kort": kort,
+                    "lang": lang,
+                    "bericht": f"Key {kort!r} is substring van {lang!r} — volgorde van vervanging telt",
+                })
+
+    # Type 3: mojibake in memory-key of -vervanging
+    for item in replacements:
+        tekst = item.get("tekst", "") + " " + item.get("vervanging", "")
+        if "�" in tekst or "Ã«" in tekst or "Ã©" in tekst:
+            conflicten.append({
+                "type": "mojibake",
+                "key": item.get("tekst", ""),
+                "bericht": f"Mojibake-verdacht karakter in memory-entry {item.get('tekst', '')!r}",
+            })
+
+    return conflicten

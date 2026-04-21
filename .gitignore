@@ -8,3 +8,4 @@ standaard.yaml
 testset/*
 !testset/README.md
 !testset/*.groundtruth.json
+!testset/synth-*.md

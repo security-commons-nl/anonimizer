@@ -23,6 +23,7 @@ import markdown as md_lib
 from converter import to_markdown, ONDERSTEUNDE_EXTENSIES
 from detector import detect
 from replacer import build_mapping, apply
+from audit import AuditLog
 import memory
 import standaard
 
@@ -205,10 +206,12 @@ def verwerk_bestand(
     pad: pathlib.Path,
     output_pad: pathlib.Path | None = None,
     dry_run: bool = False,
+    audit_log: AuditLog | None = None,
 ) -> None:
     """Process a single file: convert, detect, replace, write .md + .html.
 
     In dry_run modus: alleen detectie, geen wegschrijven, JSON-rapport op stdout.
+    Als audit_log gegeven is: elke vervanging wordt gelogd met bron-laag.
     """
     click.echo(f"\n{'─' * 60}")
     click.echo(f"  Bestand: {click.style(str(pad), bold=True)}")
@@ -231,7 +234,7 @@ def verwerk_bestand(
     click.echo(f"  Analyseren... ({len(tekst)} tekens)")
 
     # Detect (3 layers)
-    auto_mapping, new_entities = detect(tekst, mem, std)
+    auto_mapping, new_entities, bron = detect(tekst, mem, std)
 
     # --- dry-run: rapporteer en stop ---
     if dry_run:
@@ -239,7 +242,7 @@ def verwerk_bestand(
             "bestand": str(pad),
             "tekens": len(tekst),
             "auto_mapping": [
-                {"tekst": orig, "vervanging": repl}
+                {"tekst": orig, "vervanging": repl, "bron": bron.get(orig, "?")}
                 for orig, repl in sorted(auto_mapping.items())
             ],
             "llm_entiteiten": new_entities,
@@ -252,7 +255,9 @@ def verwerk_bestand(
     if auto_mapping:
         click.echo(f"  Automatisch toegepast: {len(auto_mapping)} vervanging(en) (standaard + geheugen + patroon)")
         for orig, repl in sorted(auto_mapping.items()):
-            click.echo(f"    - \"{orig}\" -> \"{repl}\"")
+            click.echo(f"    - \"{orig}\" -> \"{repl}\" [{bron.get(orig, '?')}]")
+            if audit_log:
+                audit_log.log(str(pad), orig, repl, bron.get(orig, "?"))
 
     # Interactive loop for new entities
     approved = interactief(new_entities)
@@ -261,6 +266,11 @@ def verwerk_bestand(
     if approved:
         for item in approved:
             mem = memory.remember(item["tekst"], item["vervanging"], item.get("categorie", "overig"), mem)
+            if audit_log:
+                audit_log.log(
+                    str(pad), item["tekst"], item["vervanging"],
+                    "llm+bevestigd", item.get("categorie", ""),
+                )
         memory.save(mem)
 
     if not auto_mapping and not approved:
@@ -310,7 +320,9 @@ def cli():
               help="Verwerk alle ondersteunde bestanden in een map")
 @click.option("--dry-run", is_flag=True,
               help="Toon alleen detecties als JSON, schrijf geen output")
-def verwerk(pad, output, batch, dry_run):
+@click.option("--audit", type=click.Path(), default=None,
+              help="Schrijf per vervanging een JSONL-auditregel naar dit bestand")
+def verwerk(pad, output, batch, dry_run, audit):
     """Verwerk een document of map en verwijder identificerende informatie interactief.
 
     Ondersteunde formaten: .md, .txt, .html, .htm, .docx, .pdf, .pptx, .xlsx
@@ -325,27 +337,47 @@ def verwerk(pad, output, batch, dry_run):
         sys.exit(1)
 
     pad = pathlib.Path(pad)
+    audit_log = AuditLog(audit) if audit else None
 
-    if batch or pad.is_dir():
-        bestanden = []
-        for ext in ONDERSTEUNDE_EXTENSIES:
-            bestanden.extend(pad.glob(f"*{ext}"))
-        bestanden = sorted(set(bestanden))
+    # Conflict-detectie: waarschuw bij dubbele keys, substring-overlap, mojibake
+    conflicten = memory.detecteer_conflicten(memory.load(), standaard.laad())
+    if conflicten:
+        click.echo(click.style(
+            f"⚠ {len(conflicten)} conflict(en) in memory/standaard — "
+            "detectie werkt maar resultaat kan inconsistent zijn:",
+            fg="yellow"
+        ), err=True)
+        for c in conflicten[:10]:  # max 10 tonen
+            click.echo(f"    [{c['type']}] {c['bericht']}", err=True)
+        if len(conflicten) > 10:
+            click.echo(f"    ... en nog {len(conflicten) - 10} meer", err=True)
+        click.echo("", err=True)
 
-        if not bestanden:
-            click.echo(f"Geen ondersteunde bestanden gevonden in {pad}.")
-            click.echo(f"Ondersteund: {', '.join(sorted(ONDERSTEUNDE_EXTENSIES))}")
-            return
+    try:
+        if batch or pad.is_dir():
+            bestanden = []
+            for ext in ONDERSTEUNDE_EXTENSIES:
+                bestanden.extend(pad.glob(f"*{ext}"))
+            bestanden = sorted(set(bestanden))
 
-        click.echo(f"{len(bestanden)} bestand(en) gevonden.")
-        for bestand in bestanden:
-            verwerk_bestand(bestand, dry_run=dry_run)
+            if not bestanden:
+                click.echo(f"Geen ondersteunde bestanden gevonden in {pad}.")
+                click.echo(f"Ondersteund: {', '.join(sorted(ONDERSTEUNDE_EXTENSIES))}")
+                return
 
-        click.echo(f"\n{'=' * 60}")
-        click.echo("Klaar.")
-    else:
-        output_pad = pathlib.Path(output) if output else None
-        verwerk_bestand(pad, output_pad, dry_run=dry_run)
+            click.echo(f"{len(bestanden)} bestand(en) gevonden.")
+            for bestand in bestanden:
+                verwerk_bestand(bestand, dry_run=dry_run, audit_log=audit_log)
+
+            click.echo(f"\n{'=' * 60}")
+            click.echo("Klaar.")
+        else:
+            output_pad = pathlib.Path(output) if output else None
+            verwerk_bestand(pad, output_pad, dry_run=dry_run, audit_log=audit_log)
+    finally:
+        if audit_log:
+            audit_log.sluit()
+            click.echo(f"\nAudit-log: {audit}")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,33 @@
 """Convert PDF to markdown text. Images are replaced with a placeholder."""
 import pathlib
 import re
+import sys
 import pypdf
+
+
+# Tekens die typisch duiden op encoding-problemen in PDF-extractie.
+# U+FFFD (�) is de standaard replacement character.
+# Andere: losse surrogate-halves die per ongeluk als teken overblijven.
+_MOJIBAKE_INDICATOREN = ("�",)
+
+
+def _scan_mojibake(tekst: str, pad: pathlib.Path) -> None:
+    """Detecteer mojibake-indicaties en waarschuw (stderr, niet blocking).
+
+    PDF-extractie faalt soms stil op diacrieten (bv. Henriëtte → Henri�tte).
+    Wanneer dit gebeurt, kan de NER-laag de naam niet herkennen. We
+    rapporteren het aan de gebruiker zodat zij weten dat de input twijfelachtig
+    is en eventueel kunnen kiezen voor handmatige review of een andere extractor.
+    """
+    aantal = sum(tekst.count(m) for m in _MOJIBAKE_INDICATOREN)
+    if aantal == 0:
+        return
+    print(
+        f"  ⚠ PDF-encoding-waarschuwing: {aantal} vervangkarakter(s) ({_MOJIBAKE_INDICATOREN[0]}) "
+        f"in {pad.name}. Diacrieten zijn mogelijk beschadigd door extractie — "
+        f"controleer of namen als 'Henriëtte' correct zijn overgekomen.",
+        file=sys.stderr,
+    )
 
 
 _SKIP_WOORDEN = re.compile(
@@ -99,4 +125,6 @@ def pdf_to_markdown(pad: pathlib.Path) -> str:
             parts.append(_add_headings(tekst))
         if page.images:
             parts.append("[AFBEELDING VERWIJDERD]")
-    return "\n\n".join(parts)
+    resultaat = "\n\n".join(parts)
+    _scan_mojibake(resultaat, pad)
+    return resultaat

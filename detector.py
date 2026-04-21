@@ -171,39 +171,40 @@ def detect(
     tekst: str,
     memory: list[dict],
     standaard: dict[str, str],
-) -> tuple[dict[str, str], list[dict]]:
+) -> tuple[dict[str, str], list[dict], dict[str, str]]:
     """Drie-laagse detectie (zie module-docstring).
 
     Returns:
         auto_mapping: {original: replacement} — apply silently (laag 1, 1.5, 2)
         new_entities: [{tekst, categorie, suggestie, bron}] — present interactively (laag 3)
+        bron: {original: laagnaam} — voor audit-trail
     """
     auto_mapping: dict[str, str] = {}
-    bron_van: dict[str, str] = {}
+    bron: dict[str, str] = {}
 
     # Laag 1: standaard-vervangingen
     for original, replacement in standaard.items():
         if original in tekst:
             auto_mapping[original] = replacement
-            bron_van[original] = "standaard"
+            bron[original] = "standaard"
 
     # Laag 1.5: deterministische regex-patronen
     patroon_mapping, _ = detect_patronen(tekst)
     for original, replacement in patroon_mapping.items():
         if original not in auto_mapping:
             auto_mapping[original] = replacement
-            bron_van[original] = "patroon"
+            bron[original] = "patroon"
 
     # Laag 2: memory
     for item in memory:
         t = item.get("tekst", "")
         if t and t in tekst and t not in auto_mapping:
             auto_mapping[t] = item.get("vervanging", "")
-            bron_van[t] = "geheugen"
+            bron[t] = "geheugen"
 
     # Laag 3: LLM — alleen als er tekst is
     if not tekst.strip():
-        return auto_mapping, []
+        return auto_mapping, [], bron
 
     llm_entities = _llm_detect(tekst)
 
@@ -215,4 +216,4 @@ def detect(
         if e.get("tekst", "") not in known
     ]
 
-    return auto_mapping, new_entities
+    return auto_mapping, new_entities, bron

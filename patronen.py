@@ -71,21 +71,28 @@ def _is_geldig_bsn(nummer: str) -> bool:
 
 # --- Detectie ---------------------------------------------------------------
 
+# Volgorde: meest-specifieke patronen eerst om overlap te winnen.
+# IBAN vóór telefoon (IBAN-staart zou anders als telefoon matchen).
+# KVK/FG/BSN vóór losse getallen. Email vóór alles (unieke @-anker).
 PATROON_DETECTORS = [
     # (naam, regex, categorie, vervanging, optionele validator)
     ("email",    _EMAIL,    "email",    "[e-mailadres verwijderd]", None),
-    ("telefoon", _TELEFOON, "telefoon", "[telefoonnummer verwijderd]", None),
     ("iban",     _IBAN_NL,  "nummer",   "[IBAN verwijderd]", None),
     ("kvk",      _KVK,      "nummer",   "[KVK-nummer verwijderd]", None),
     ("fg",       _FG_NUMMER,"nummer",   "[FG-nummer verwijderd]", None),
+    ("bsn",     _BSN_KANDIDAAT, "nummer", "[BSN verwijderd]", _is_geldig_bsn),
     ("postcode", _POSTCODE, "locatie",  "[postcode verwijderd]", None),
     ("ipv4",     _IPV4,     "nummer",   "[IP-adres verwijderd]", None),
-    ("bsn",     _BSN_KANDIDAAT, "nummer", "[BSN verwijderd]", _is_geldig_bsn),
+    ("telefoon", _TELEFOON, "telefoon", "[telefoonnummer verwijderd]", None),
 ]
 
 
 def detect_patronen(tekst: str) -> tuple[dict[str, str], list[dict]]:
     """Vind alle deterministische patronen in tekst.
+
+    Matches van eerder in PATROON_DETECTORS hebben voorrang — overlappende
+    latere matches (bv. het cijfer-deel van een IBAN dat als telefoon zou
+    kunnen worden herkend) worden genegeerd.
 
     Retourneert:
         mapping: {originele_tekst: vervanging} — kan direct op tekst toegepast worden
@@ -93,13 +100,24 @@ def detect_patronen(tekst: str) -> tuple[dict[str, str], list[dict]]:
     """
     mapping: dict[str, str] = {}
     entiteiten: list[dict] = []
+    # Reeds gematchte karakterposities (start, end) — om overlap te vermijden
+    bezette_ranges: list[tuple[int, int]] = []
+
+    def _overlapt(start: int, end: int) -> bool:
+        return any(start < e and end > s for s, e in bezette_ranges)
 
     for naam, patroon, categorie, vervanging, validator in PATROON_DETECTORS:
         for match in patroon.finditer(tekst):
             origineel = match.group(0)
+            start, end = match.start(), match.end()
+
+            if _overlapt(start, end):
+                continue
 
             if validator is not None and not validator(match.group(1) if match.groups() else origineel):
                 continue
+
+            bezette_ranges.append((start, end))
 
             if origineel in mapping:
                 continue

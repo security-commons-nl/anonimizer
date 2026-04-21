@@ -1,0 +1,26 @@
+{
+  "moet_gedetecteerd": [
+    {"tekst": "Jan Pietersen", "categorie": "persoon"},
+    {"tekst": "Henriëtte Tans", "categorie": "persoon", "opmerking": "accepteer ook match op Henri?tte of Henri Tans"},
+    {"tekst": "111222333", "categorie": "nummer"},
+    {"tekst": "NL91 ABNA 0417 1643 00", "categorie": "nummer"},
+    {"tekst": "NL39INGB0001234567", "categorie": "nummer"},
+    {"tekst": "070 373 80 11", "categorie": "telefoon"},
+    {"tekst": "info@voorbeeld.nl", "categorie": "email"},
+    {"tekst": "+31 6 12345678", "categorie": "telefoon"},
+    {"tekst": "2511 DP", "categorie": "locatie"},
+    {"tekst": "Turfmarkt 147", "categorie": "locatie"},
+    {"tekst": "IGNITE", "categorie": "project"}
+  ],
+  "moet_niet_gedetecteerd": [
+    "2021-2024",
+    "1.2.3.4",
+    "14.2.7.1",
+    "Baseline",
+    "BIO",
+    "biografie",
+    "overFGame",
+    "biography"
+  ],
+  "opmerking": "Test word-boundary voor korte keys, mojibake-herkenning en onderscheid tussen periode/versie/sectie en telefoon/IP."
+}
