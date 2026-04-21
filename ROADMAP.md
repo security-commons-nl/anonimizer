@@ -34,6 +34,24 @@ Zie [anonimizer-web](https://github.com/security-commons-nl/anonimizer-web) voor
 - [ ] `--dry-run` vlag — toon detecties zonder te schrijven
 - [ ] Integratie met kennisbank-workflow: directe upload na anonimisering
 
+### Afbeeldingen anonimiseren in plaats van verwijderen
+
+Huidige gedrag: alle afbeeldingen worden uit het document gestript en vervangen door `[AFBEELDING VERWIJDERD]`. Daarmee verdwijnt essentiële context — architectuurplaten, processchema's, screenshots die het verhaal dragen zijn onvervangbaar als tekst.
+
+Doel: afbeeldingen **behouden** in de output, maar **inhoudelijk geanonimiseerd**.
+
+- [ ] OCR-laag toevoegen (bv. Tesseract of een EU-gehoste vision-LLM) om tekst uit afbeeldingen te extraheren
+- [ ] Geëxtraheerde tekst door dezelfde anonimizer-pipeline als documenttekst (standaard.yaml → memory → LLM NER)
+- [ ] Afbeelding **her-renderen** zonder originele inhoud:
+  - Diagrammen / flowcharts → **Mermaid** (structuur behouden, tekst vervangen)
+  - Eenvoudige schema's en tabellen → **SVG** met geanonimiseerde labels
+  - Screenshots van UI's → SVG-mockup of wireframe met generieke labels
+  - Foto's van personen → blur of symbolische vervanging (geen rendering)
+- [ ] Fallback: als her-rendering niet betrouwbaar kan, val terug op huidige gedrag (strippen) + duidelijke waarschuwing in de output
+- [ ] Interactieve review: per afbeelding toont de tool het origineel + de voorgestelde vervanging, gebruiker keurt goed of slaat over
+
+Dit is de grootste waarde-toevoeging voor de kennisbank: documenten met behouden visuele structuur zonder PII-risico.
+
 ---
 
 ## Bijdragen
