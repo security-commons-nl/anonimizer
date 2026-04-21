@@ -21,7 +21,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 import markdown as md_lib
 from converter import to_markdown, ONDERSTEUNDE_EXTENSIES
-from detector import detect
+from detector import detect, voeg_anaforen_toe
 from replacer import build_mapping, apply
 from audit import AuditLog
 import memory
@@ -236,6 +236,15 @@ def verwerk_bestand(
     # Detect (3 layers)
     auto_mapping, new_entities, bron = detect(tekst, mem, std)
 
+    # Anafoor: voeg losse voornamen toe die verwijzen naar reeds gedetecteerde personen.
+    # Metadata = memory + LLM-resultaten (LLM bevat categorie; memory ook).
+    metadata_voor_anafoor = list(mem) + new_entities
+    _, anafoor_mapping = voeg_anaforen_toe(
+        {**auto_mapping, **{e["tekst"]: e.get("suggestie", "") for e in new_entities}},
+        metadata_voor_anafoor,
+        tekst,
+    )
+
     # --- dry-run: rapporteer en stop ---
     if dry_run:
         rapport = {
@@ -246,7 +255,11 @@ def verwerk_bestand(
                 for orig, repl in sorted(auto_mapping.items())
             ],
             "llm_entiteiten": new_entities,
-            "totaal": len(auto_mapping) + len(new_entities),
+            "anaforen": [
+                {"tekst": k, "vervanging": v, "bron": "anafoor"}
+                for k, v in sorted(anafoor_mapping.items())
+            ],
+            "totaal": len(auto_mapping) + len(new_entities) + len(anafoor_mapping),
         }
         click.echo(json.dumps(rapport, ensure_ascii=False, indent=2))
         return
@@ -277,8 +290,21 @@ def verwerk_bestand(
         click.echo("  Geen vervangingen toegepast.")
         return
 
-    # Build full mapping and apply
+    # Build full mapping
     full_mapping = {**auto_mapping, **build_mapping(approved)}
+
+    # Anafoor: breid uit met losse voornamen van bevestigde personen (Fase E1)
+    metadata_voor_anafoor = list(mem) + approved
+    full_mapping, anafoor_mapping = voeg_anaforen_toe(
+        full_mapping, metadata_voor_anafoor, tekst
+    )
+    if anafoor_mapping:
+        click.echo(f"  Anafoor-uitbreidingen: {len(anafoor_mapping)}")
+        for orig, repl in sorted(anafoor_mapping.items()):
+            click.echo(f"    - \"{orig}\" -> \"{repl}\" [anafoor]")
+            if audit_log:
+                audit_log.log(str(pad), orig, repl, "anafoor")
+
     resultaat = apply(tekst, full_mapping)
 
     # Second pass: re-apply standaard to catch strings introduced by memory replacements
