@@ -4,6 +4,8 @@
 
 Gebouwd zodat CISO's en ISO's interne kennis kunnen delen via de [kennisbank](https://github.com/security-commons-nl/kennisbank) zonder privacyrisico's.
 
+> **Nieuw hier?** Lees de [handleiding](docs/handleiding.md) — stap-voor-stap gids met voorbeelden, redactionele keuzes en troubleshooting.
+
 ---
 
 ## Wat het doet
@@ -130,6 +132,7 @@ Wordt automatisch aangemaakt. Bevat alle eerder bevestigde vervangingen. Niet in
 
 ## Meer documentatie
 
+- [Handleiding](docs/handleiding.md) — stap-voor-stap gids voor CISO's en ISO's
 - [Concept en ontwerp](docs/concept.md)
 - [Bijdragen](https://github.com/security-commons-nl/.github/blob/main/CONTRIBUTING.md)
 
