@@ -1,11 +1,21 @@
 .env
 __pycache__/
 *.py[cod]
+
+# AI-tooling (lokaal per ontwikkelaar, niet delen)
 .claude/
 .codesight/
+CLAUDE.md
+AGENTS.md
+codex.md
+.cursorrules
+
+# Lokale configuratie en gebruikersdata
 memory.json
 memory.json.bak
 standaard.yaml
+
+# Testset — echte documenten bevatten vaak PII en worden lokaal gezet
 testset/*
 !testset/README.md
 !testset/*.groundtruth.json
