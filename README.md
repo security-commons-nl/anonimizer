@@ -3,7 +3,7 @@
 > Verwijder persoonsgegevens en organisatiespecifieke informatie uit documenten — interactief, transparant, EU-soeverein.
 
 
-[![Bijdragen](https://img.shields.io/badge/📝_Open_een_bericht-238636?style=for-the-badge)](../../issues/new/choose)&nbsp;&nbsp;&nbsp;&nbsp;[![Discussions](https://img.shields.io/badge/💬_Meepraten_in_discussions-0969da?style=for-the-badge)](../../discussions)
+[![Bijdragen](https://img.shields.io/badge/📝_Bijdragen-238636?style=for-the-badge)](../../issues/new/choose)&nbsp;&nbsp;&nbsp;&nbsp;[![Meepraten](https://img.shields.io/badge/💬_Meepraten-0969da?style=for-the-badge)](../../discussions)
 
 👉 **Iets delen, feedback geven of een vraag stellen?** Klik op een van de knoppen hierboven — geen Git-ervaring nodig. Zie [CONTRIBUTING.md](CONTRIBUTING.md) voor meer opties.
 
