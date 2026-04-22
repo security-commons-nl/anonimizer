@@ -66,11 +66,18 @@ Analyseer de gegeven tekst en identificeer ALLE elementen die vervangen moeten w
 - Formulier- of kolomkoppen zonder concrete waarde: "Naam", "Telefoonnummer", "E-mailadres", "Organisatie", "Geslacht", "Geboortedatum", "Adres" — dit zijn labels in een formulier, geen data
 - Afkortingen uit officiële tabellen: AVG, AP, FG, CISO, ISO, CIO, BIO, BIG, BSN, AVG, Wpg, ICT, RACI, NTA, NEN
 - Functietitels in rol-beschrijvingen zónder persoonsnaam ("De CISO is verantwoordelijk voor...")
+- Generieke functietitels die al met lidwoord staan ("de directeur", "de griffier", "de leidinggevende", "de budgethouder", "de gemeentearchivaris") — laat staan; niet detecteren
+- Artikelverwijzingen binnen het eigen reglement ("artikel 3.1", "artikel 4.2 lid b") — dit is de interne structuur van het document, geen PII
+- Publieke normen met hun nummer: NEN 7510, NTA 7516, ISO 27001 — dit zijn publieke standaarden
 - Publieke organisaties/standaarden die algemeen bekend zijn:
   IBD (Informatiebeveiligingsdienst), VNG, NCSC, Autoriteit Persoonsgegevens, AP,
   Baseline Informatiebeveiliging Overheid (BIO), BIG, Basisregistratie Personen,
   Rijksoverheid, Nationaal Cyber Security Centrum
 - Generieke software-/methode-namen: Microsoft Teams, Topdesk, JOIN, Sharepoint, Outlook, Root Cause Analysis, Mermaid
+
+**Kritische regel voor suggesties:**
+- Je suggestie moet ALTIJD betekenisvol verschillen van het origineel. Als je beste suggestie identiek is aan het origineel (case-insensitive), detecteer het dan NIET — dan hoort het thuis in "niet detecteren".
+- Als het origineel al met een lidwoord staat ("de Privacy Officer"), neem dat lidwoord dan NIET opnieuw op in je suggestie — het staat er al in de tekst. Schrijf in dat geval alleen het zelfstandig naamwoord als suggestie ("de privacyfunctionaris" staat OK, maar alleen als het origineel GEEN "de" bevatte).
 
 Geef je antwoord als JSON met deze structuur:
 {
@@ -97,6 +104,9 @@ Voorbeelden:
 - "Bijlage 3: Topdesk formulier Aanmelder Naam Telefoonnummer E-mail Organisatie" → NIET detecteren (formulierlabels)
 - "De IBD is het CERT voor gemeenten" → IBD niet vervangen (publieke organisatie)
 - "goedgekeurd door Bas Stevens (CISO)" → "Bas Stevens" vervangen door "de CISO"
+- "de directeur stuurt de aanvraag" → NIET detecteren ("de directeur" is al generiek)
+- "conform artikel 3.7 van dit reglement" → NIET detecteren (interne structuurverwijzing)
+- "voldoen aan NEN 7510-2:2017" → NIET detecteren (publieke norm)
 """
 
 
