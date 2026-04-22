@@ -5,6 +5,67 @@ import pathlib
 MEMORY_PAD = pathlib.Path(__file__).parent / "memory.json"
 
 
+# Generieke lowercase-nouns die als losse memory-key cascade-problemen
+# veroorzaken: ze komen als substring voor in samenstellingen
+# ('beveiliging' in 'informatiebeveiliging', 'directeur' in 'directeuren').
+# Zelfs met \b-wrapping in de replacer blijven deze te generiek om veilig
+# globaal te hergebruiken — context bepaalt de juiste vervanging.
+BLOCKLIST_GENERIEKE_NOUNS = frozenset({
+    "beveiliging",
+    "directeur",
+    "directie",
+    "griffie",
+    "griffier",
+    "college",
+    "receptie",
+    "directoraat",
+    "afdeling",
+    "manager",
+    "teamleider",
+    "medewerker",
+    "leidinggevende",
+    "ambtenaar",
+})
+
+# Karakters die op mojibake wijzen (kapotte encoding). Entries die deze
+# bevatten zijn onbetrouwbaar: ze matchen niet op correct gecodeerde
+# documenten en vervuilen het geheugen.
+_MOJIBAKE_MARKERS = ("�", "Ã«", "Ã©", "Ã¨", "Ã¯", "Ã¶", "Ã¼")
+
+
+def valideer_entry(tekst: str, vervanging: str) -> tuple[bool, str]:
+    """Bepaal of een memory-entry veilig is om op te slaan.
+
+    Returns (ok, reden). Als ok=False dan is reden een korte uitleg die
+    geschikt is om aan de gebruiker te tonen.
+
+    Weigert:
+      - lege tekst
+      - no-ops (origineel == vervanging, case-insensitive na trim)
+      - mojibake in origineel of vervanging
+      - losse generieke lowercase-nouns (zie BLOCKLIST_GENERIEKE_NOUNS)
+    """
+    if not tekst or not tekst.strip():
+        return False, "lege tekst"
+
+    if tekst.strip().casefold() == vervanging.strip().casefold():
+        return False, "no-op: origineel is identiek aan vervanging"
+
+    samen = tekst + " " + vervanging
+    if any(marker in samen for marker in _MOJIBAKE_MARKERS):
+        return False, "mojibake: kapotte encoding in tekst of vervanging"
+
+    # Losse generieke noun? (een enkel woord uit de blocklist)
+    genormaliseerd = tekst.strip().casefold()
+    if " " not in genormaliseerd and genormaliseerd in BLOCKLIST_GENERIEKE_NOUNS:
+        return False, (
+            f"generiek: {tekst!r} staat op de blocklist — te veel false "
+            "positives als los woord"
+        )
+
+    return True, ""
+
+
 def load() -> list[dict]:
     """Return list of {tekst, vervanging, categorie} dicts. Empty list if file does not exist."""
     if not MEMORY_PAD.exists():
@@ -33,12 +94,25 @@ def lookup(tekst: str, replacements: list[dict]) -> str | None:
 
 
 def remember(tekst: str, vervanging: str, categorie: str, replacements: list[dict]) -> list[dict]:
-    """Add a replacement to the list (no duplicates). Returns updated list."""
+    """Add a replacement to the list. No duplicates. Returns updated list.
+
+    Update van een bestaande entry is altijd toegestaan (eerder bevestigd).
+    Nieuwe entries worden gevalideerd via valideer_entry — invalide entries
+    worden stilletjes overgeslagen. Gebruik valideer_entry in de UI-laag
+    om de reden zichtbaar te maken vóór je remember() aanroept.
+    """
+    # Update-pad: bestaande entry, valideer niet (was al eerder bevestigd).
     for item in replacements:
         if item.get("tekst") == tekst:
             item["vervanging"] = vervanging
             item["categorie"] = categorie
             return replacements
+
+    # Nieuwe entry: valideer voor toevoegen.
+    ok, _ = valideer_entry(tekst, vervanging)
+    if not ok:
+        return replacements
+
     replacements.append({"tekst": tekst, "vervanging": vervanging, "categorie": categorie})
     return replacements
 
