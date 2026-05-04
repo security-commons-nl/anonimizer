@@ -275,9 +275,15 @@ def verwerk_bestand(
     # Interactive loop for new entities
     approved = interactief(new_entities)
 
-    # Save newly confirmed to memory
+    # Save newly confirmed to memory (valideren om rotzooi te weren)
     if approved:
         for item in approved:
+            ok, reden = memory.valideer_entry(item["tekst"], item["vervanging"])
+            if not ok:
+                click.echo(
+                    f"    ⚠ niet opgeslagen in memory: \"{item['tekst']}\" — {reden}",
+                    err=True,
+                )
             mem = memory.remember(item["tekst"], item["vervanging"], item.get("categorie", "overig"), mem)
             if audit_log:
                 audit_log.log(
