@@ -10,6 +10,14 @@ updates:
       prefix: "deps"
     labels:
       - "dependencies"
+    # Cooldown: wacht 7 dagen na release voor we een bump openen.
+    # Vangt snel-ontdekte supply-chain attacks (xz-utils-pattern).
+    # Verhoogd risico hier omdat anonimizer klantdata (memory.json) verwerkt.
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 14
+      semver-patch-days: 7
 
   - package-ecosystem: "github-actions"
     directory: "/"
