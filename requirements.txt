@@ -1,4 +1,4 @@
-click>=8.3.3
+click>=8.4.1
 pypdf>=3.0
 python-docx>=1.2.0
 python-pptx>=1.0.2
