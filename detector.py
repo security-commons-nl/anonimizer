@@ -9,6 +9,7 @@ Drie-laagse detectie:
                        die de LLM soms ten onrechte markeert
 """
 import json
+import sys
 from llm_client import chat
 from patronen import detect_patronen
 from anafoor import expand_persoon_mappings
@@ -141,12 +142,22 @@ def _chunk_tekst(tekst: str, grootte: int = _CHUNK_GROOTTE, overlap: int = _CHUN
 
 
 def _llm_detect_chunk(tekst: str) -> list[dict]:
-    """Call LLM op één chunk en retourneer ruwe lijst."""
+    """Call LLM op één chunk en retourneer ruwe lijst.
+
+    De LLM-laag is aanvullend op de deterministische lagen. Faalt de API
+    (auth/quota/netwerk), dan degraderen we naar die lagen i.p.v. de hele
+    detectie te laten crashen — de fout gaat naar stderr, niet stil weg.
+    """
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"Analyseer deze tekst:\n\n{tekst}"},
     ]
-    response = chat(messages, response_format="json")
+    try:
+        response = chat(messages, response_format="json")
+    except Exception as e:  # API-/netwerkfout: niet fataal, LLM-laag overslaan
+        print(f"[anonimizer] LLM-laag overgeslagen ({e}); alleen deterministische detectie.",
+              file=sys.stderr)
+        return []
     try:
         return json.loads(response).get("entiteiten", [])
     except json.JSONDecodeError:
