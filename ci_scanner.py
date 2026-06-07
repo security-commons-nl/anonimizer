@@ -35,20 +35,29 @@ def main():
         sys.exit(0)
 
     # In CI: no memory, no standaard config (by design — more noise is acceptable)
-    _, entiteiten = detect(tekst, [], {})
+    auto_mapping, entiteiten, bron = detect(tekst, [], {})
 
-    if not entiteiten:
+    # Deterministische treffers (laag 1/1.5/2, o.a. regex voor BSN/IBAN/e-mail)
+    # werken óók zonder LLM-API — die willen we sowieso melden.
+    det_regels = [
+        f"- **{bron.get(original, 'deterministisch').capitalize()}**: `{original}`"
+        for original in auto_mapping
+    ]
+    llm_regels = [
+        f"- **{e.get('categorie', 'overig').capitalize()}**: `{e.get('tekst', '')}`"
+        f" (suggestie: _{e.get('suggestie', '')}_)"
+        for e in entiteiten
+    ]
+
+    if not det_regels and not llm_regels:
         sys.exit(0)
 
     print(f"### Anonimizer Advies: `{pad.name}`")
     print("")
     print("Ik heb dit bestand gescand en vond de volgende potentieel gevoelige informatie:\n")
 
-    for e in entiteiten:
-        t = e.get("tekst", "")
-        c = e.get("categorie", "overig").capitalize()
-        s = e.get("suggestie", "")
-        print(f"- **{c}**: `{t}` (suggestie: _{s}_)")
+    for regel in det_regels + llm_regels:
+        print(regel)
 
     print("")
     print("> Controleer of deze termen bewust gebruikt worden of dat de lokale")
