@@ -70,11 +70,11 @@ Doel: afbeeldingen **behouden** in de output, maar **inhoudelijk geanonimiseerd*
 
 Dit is de grootste waarde-toevoeging voor de kennisbank: documenten met behouden visuele structuur zonder PII-risico.
 
-### Fase 4 — anonimizer-web
+### Fase 4 — anonimizer-browser
 
 Browser-gebaseerde UI zodat CISO's zonder Python-kennis documenten kunnen anonimiseren.
 
-Zie [anonimizer-web](https://github.com/security-commons-nl/anonimizer-web) voor de roadmap van de webinterface.
+Zie [anonimizer-browser](https://github.com/security-commons-nl/anonimizer-browser) voor de browser-versie. (De eerdere Flask-app `anonimizer-web` is gearchiveerd en vervangen door `anonimizer-browser`.)
 
 ---
 

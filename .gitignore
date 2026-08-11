@@ -20,3 +20,7 @@ testset/*
 !testset/README.md
 !testset/*.groundtruth.json
 !testset/synth-*.md
+
+# Backups van vervangingslijsten: bevatten de originele (PII-)waarden
+*.bak
+memory.json.*
