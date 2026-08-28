@@ -12,7 +12,7 @@ class TestKorteKeyHerkenning:
     def test_kort_alfanumeriek_is_kort(self, key):
         assert _is_korte_key(key)
 
-    @pytest.mark.parametrize("key", ["Leiden", "Gemeente Leiden", "Holland Rijnland"])
+    @pytest.mark.parametrize("key", ["Duinstad", "Gemeente Duinstad", "Regio Duinland"])
     def test_lang_is_niet_kort(self, key):
         assert not _is_korte_key(key)
 
@@ -42,7 +42,7 @@ class TestWordBoundaryVoorKorteKeys:
         assert "de Baseline" in result
 
     def test_lange_key_werkt_als_voorheen(self):
-        result = apply("Gemeente Leiden is groot", {"Gemeente Leiden": "VOORBEELDGEMEENTE"})
+        result = apply("Gemeente Duinstad is groot", {"Gemeente Duinstad": "VOORBEELDGEMEENTE"})
         assert "VOORBEELDGEMEENTE" in result
 
     def test_case_insensitive_blijft(self):
@@ -58,19 +58,19 @@ class TestWordBoundaryVoorKorteKeys:
 class TestLangereFrase:
     def test_langer_dan_drempel(self):
         # Korte frases met spaties zijn technisch >4 tekens, geen boundary nodig
-        result = apply("in de Leidse Regio is het", {"Leidse Regio": "REGIO"})
+        result = apply("in de Duinse Regio is het", {"Duinse Regio": "REGIO"})
         assert "REGIO" in result
 
 
 class TestVolgorde:
     def test_langste_matches_eerst(self):
-        # "Gemeente Leiden" moet vóór "Leiden" vervangen worden
+        # "Gemeente Duinstad" moet vóór "Duinstad" vervangen worden
         result = apply(
-            "Gemeente Leiden in Leiden",
-            {"Leiden": "STAD", "Gemeente Leiden": "GEMEENTE"},
+            "Gemeente Duinstad in Duinstad",
+            {"Duinstad": "STAD", "Gemeente Duinstad": "GEMEENTE"},
         )
         assert "GEMEENTE" in result
-        # Na eerste substitutie moet de losse "Leiden" ook vervangen worden
+        # Na eerste substitutie moet de losse "Duinstad" ook vervangen worden
         assert "STAD" in result
 
 
@@ -143,18 +143,18 @@ class TestPlaceholderLijstCollapsen:
 
     def test_drie_tokens_komma_gescheiden(self):
         result = apply(
-            "de gemeenten Leiden, Leiderdorp, Oegstgeest",
-            {"Leiden": "VOORBEELDGEMEENTE", "Leiderdorp": "VOORBEELDGEMEENTE", "Oegstgeest": "VOORBEELDGEMEENTE"},
+            "de gemeenten Duinstad, Boswijk, Meerdorp",
+            {"Duinstad": "VOORBEELDGEMEENTE", "Boswijk": "VOORBEELDGEMEENTE", "Meerdorp": "VOORBEELDGEMEENTE"},
         )
         assert "VOORBEELDGEMEENTE, VOORBEELDGEMEENTE" not in result
         assert "de betrokken gemeenten" in result
 
     def test_vier_tokens_met_en(self):
         result = apply(
-            "Leiden, Leiderdorp, Oegstgeest en Zoeterwoude",
+            "Duinstad, Boswijk, Meerdorp en Veenhof",
             {
-                "Leiden": "VOORBEELDGEMEENTE", "Leiderdorp": "VOORBEELDGEMEENTE",
-                "Oegstgeest": "VOORBEELDGEMEENTE", "Zoeterwoude": "VOORBEELDGEMEENTE",
+                "Duinstad": "VOORBEELDGEMEENTE", "Boswijk": "VOORBEELDGEMEENTE",
+                "Meerdorp": "VOORBEELDGEMEENTE", "Veenhof": "VOORBEELDGEMEENTE",
             },
         )
         assert "de betrokken gemeenten" in result
@@ -163,29 +163,29 @@ class TestPlaceholderLijstCollapsen:
     def test_twee_tokens_met_en(self):
         # Zelfs 2 identieke op rij is informatieverlies — collapse
         result = apply(
-            "Leiden en Leiderdorp",
-            {"Leiden": "VOORBEELDGEMEENTE", "Leiderdorp": "VOORBEELDGEMEENTE"},
+            "Duinstad en Boswijk",
+            {"Duinstad": "VOORBEELDGEMEENTE", "Boswijk": "VOORBEELDGEMEENTE"},
         )
         assert "de betrokken gemeenten" in result
 
     def test_twee_tokens_met_of(self):
         result = apply(
-            "Leiden of Leiderdorp",
-            {"Leiden": "VOORBEELDGEMEENTE", "Leiderdorp": "VOORBEELDGEMEENTE"},
+            "Duinstad of Boswijk",
+            {"Duinstad": "VOORBEELDGEMEENTE", "Boswijk": "VOORBEELDGEMEENTE"},
         )
         assert "de betrokken gemeenten" in result
 
     def test_enkele_token_blijft_staan(self):
         # Eén VOORBEELDGEMEENTE in een zin — niet collapsen
-        result = apply("alleen Leiden doet mee", {"Leiden": "VOORBEELDGEMEENTE"})
+        result = apply("alleen Duinstad doet mee", {"Duinstad": "VOORBEELDGEMEENTE"})
         assert "VOORBEELDGEMEENTE" in result
         assert "de betrokken gemeenten" not in result
 
     def test_twee_verschillende_placeholders_niet_collapsen(self):
         # VOORBEELDGEMEENTE en VOORBEELDREGIO zijn verschillend
         result = apply(
-            "Leiden en Leidse Regio",
-            {"Leiden": "VOORBEELDGEMEENTE", "Leidse Regio": "VOORBEELDREGIO"},
+            "Duinstad en Duinse Regio",
+            {"Duinstad": "VOORBEELDGEMEENTE", "Duinse Regio": "VOORBEELDREGIO"},
         )
         assert "VOORBEELDGEMEENTE" in result
         assert "VOORBEELDREGIO" in result

@@ -2,7 +2,7 @@
 
 Word-boundary logica: elke key waarvan het eerste én laatste teken een
 woord-karakter is (letter/cijfer/_) krijgt `\\b`-wrapping. Dat voorkomt
-dat 'beveiliging' matcht binnen 'informatiebeveiliging' of 'Leiden'
+dat 'beveiliging' matcht binnen 'informatiebeveiliging' of 'leiden'
 binnen 'begeleiden'. Keys die beginnen of eindigen op niet-woord-tekens
 (bv. '(C)ISO', 'IB-') krijgen geen \\b omdat dat regex-semantisch niet
 betrouwbaar is aan de grens.
@@ -75,7 +75,7 @@ def apply(text: str, mapping: dict[str, str]) -> str:
     """Apply all replacements to the text.
 
     Longer matches first to avoid partial replacements.
-    Case-insensitive: 'Leidse regio' matches 'Leidse Regio' key.
+    Case-insensitive: 'Duinse regio' matches 'Duinse Regio' key.
     Elke key die op woord-karakters begint én eindigt krijgt \\b-wrapping,
     ongeacht lengte. Dat voorkomt dat 'beveiliging' matcht binnen
     'informatiebeveiliging'.

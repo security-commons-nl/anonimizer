@@ -10,7 +10,7 @@ Ground truth per document:
     testset/<bestand>.groundtruth.json
     {
       "moet_gedetecteerd": [
-        {"tekst": "Bas Stevens", "categorie": "persoon"},
+        {"tekst": "Kees Pieters", "categorie": "persoon"},
         {"tekst": "KVK 27364192", "categorie": "nummer"}
       ],
       "moet_niet_gedetecteerd": [

@@ -92,7 +92,7 @@ Geef je antwoord als JSON met deze structuur:
 }
 
 Regels voor suggesties:
-- Gebruik de context: "Bas Stevens (CISO)" → suggestie "de CISO"
+- Gebruik de context: "Kees Pieters (CISO)" → suggestie "de CISO"
 - Wees consistent: dezelfde entiteit krijgt dezelfde suggestie, ook bij losse voornaam ("Bas" later in doc ook → "de CISO")
 - Wees specifiek genoeg: "de afdeling" of "de leverancier" is beter dan "[verwijderd]"
 - E-mailadressen → "[e-mailadres verwijderd]"
@@ -104,7 +104,7 @@ Voorbeelden:
 - "informeer de Privacy Officers Bart Kock en Dimitri IJzerman" → Bart Kock en Dimitri IJzerman zijn personen
 - "Bijlage 3: Topdesk formulier Aanmelder Naam Telefoonnummer E-mail Organisatie" → NIET detecteren (formulierlabels)
 - "De IBD is het CERT voor gemeenten" → IBD niet vervangen (publieke organisatie)
-- "goedgekeurd door Bas Stevens (CISO)" → "Bas Stevens" vervangen door "de CISO"
+- "goedgekeurd door Kees Pieters (CISO)" → "Kees Pieters" vervangen door "de CISO"
 - "de directeur stuurt de aanvraag" → NIET detecteren ("de directeur" is al generiek)
 - "conform artikel 3.7 van dit reglement" → NIET detecteren (interne structuurverwijzing)
 - "voldoen aan NEN 7510-2:2017" → NIET detecteren (publieke norm)

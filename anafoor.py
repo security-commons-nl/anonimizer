@@ -5,7 +5,7 @@ zoekt deze module losse voornaam-verwijzingen verderop in het document en
 koppelt ze aan dezelfde vervanging.
 
 Voorbeeld:
-    LLM detecteert: {"Bas Stevens": "de CISO"}
+    LLM detecteert: {"Kees Pieters": "de CISO"}
     Document bevat later: "Bas meldt dat..."
     → anafoor voegt toe: {"Bas": "de CISO"}
 

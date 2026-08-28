@@ -13,7 +13,7 @@ def _rep(tekst, vervanging, categorie="overig"):
 class TestConflictDetectie:
     def test_geen_conflicten(self):
         mem = [_rep("Jan Pietersen", "[persoon]")]
-        std = {"Gemeente Leiden": "VOORBEELDGEMEENTE"}
+        std = {"Gemeente Duinstad": "VOORBEELDGEMEENTE"}
         assert detecteer_conflicten(mem, std) == []
 
     def test_dubbele_key_met_verschillende_waarde(self):
@@ -32,12 +32,12 @@ class TestConflictDetectie:
         assert result == []
 
     def test_substring_detectie(self):
-        mem = [_rep("Leiden", "X"), _rep("Gemeente Leiden", "Y")]
+        mem = [_rep("Duinstad", "X"), _rep("Gemeente Duinstad", "Y")]
         std = {}
         result = [c for c in detecteer_conflicten(mem, std) if c["type"] == "substring"]
         assert len(result) == 1
-        assert result[0]["kort"] == "Leiden"
-        assert result[0]["lang"] == "Gemeente Leiden"
+        assert result[0]["kort"] == "Duinstad"
+        assert result[0]["lang"] == "Gemeente Duinstad"
 
     def test_mojibake_detectie_fffd(self):
         mem = [_rep("Henri�tte", "[persoon]")]
@@ -64,7 +64,7 @@ class TestValideerEntry:
     generieke lowercase-nouns die substring-cascade veroorzaken."""
 
     def test_accept_normale_entry(self):
-        ok, reden = valideer_entry("Bas Stevens", "de CISO")
+        ok, reden = valideer_entry("Kees Pieters", "de CISO")
         assert ok, reden
 
     def test_weigert_no_op(self):
@@ -121,9 +121,9 @@ class TestRememberSkiptInvalid:
 
     def test_remember_voegt_geldig_entry_wel_toe(self):
         mem = []
-        mem = remember("Bas Stevens", "de CISO", "persoon", mem)
+        mem = remember("Kees Pieters", "de CISO", "persoon", mem)
         assert len(mem) == 1
-        assert mem[0]["tekst"] == "Bas Stevens"
+        assert mem[0]["tekst"] == "Kees Pieters"
 
     def test_remember_update_van_bestaande_entry_behoudt_gedrag(self):
         mem = [{"tekst": "X", "vervanging": "Y", "categorie": "a"}]

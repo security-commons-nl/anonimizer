@@ -1,6 +1,8 @@
 # Testset — anonimizer
 
-Set van 7 beleidsdocumenten (Leidse Regio) om detectie-kwaliteit te meten.
+Set om detectie-kwaliteit te meten. In de repo staat alleen de synthetische set (`synth-edge-cases.md`);
+groundtruth-bestanden voor echte beleidsdocumenten houd je lokaal (zie `.gitignore`), omdat ze de
+gevonden persoonsgegevens letterlijk bevatten.
 
 ## Gebruik
 
@@ -26,15 +28,7 @@ Deze annotaties zijn handmatig opgebouwd en mogen uitgebreid worden zodra nieuwe
 
 ## Documenten (niet in git)
 
-De testdocumenten zelf zijn `.gitignore`d — het zijn interne Leiden-stukken. Zet ze hier neer om te draaien:
-
-```
-testset/
-  ├── Beleid Email en Chat voor Gezondheidsinformatie.docx
-  ├── Beleid Strategisch IB-beleid Leidse Regio.pdf
-  ├── Beleid Strategisch Privacy Beleid Leidse Regio.pdf
-  ├── Draaiboek Ransomware Aanval.docx
-  ├── Geheimhoudingsverklaringen.docx
-  ├── Procedure datalekken.docx
-  └── Reglement IT-apparatuur en elektronische communicatiemiddelen.docx
-```
+De testdocumenten en hun groundtruth-bestanden staan niet in git: het zijn interne beleidsstukken van een
+organisatie, en de groundtruth bevat letterlijk de persoonsgegevens die erin gevonden zijn. Zet je eigen
+documenten in `testset/` en maak per document een `<naam>.groundtruth.json` (formaat: zie
+`synth-edge-cases.md.groundtruth.json`). Alleen de synthetische set is publiek.

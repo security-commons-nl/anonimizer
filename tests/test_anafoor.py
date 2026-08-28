@@ -8,7 +8,7 @@ from anafoor import vind_anaforen, expand_persoon_mappings, _splits_naam
 
 class TestSplitsNaam:
     def test_twee_termen(self):
-        assert _splits_naam("Bas Stevens") == ("Bas", "Stevens")
+        assert _splits_naam("Kees Pieters") == ("Kees", "Pieters")
 
     def test_drie_termen(self):
         assert _splits_naam("Jan de Vries") == ("Jan", "de Vries")
@@ -49,8 +49,8 @@ class TestVindAnaforen:
         """'Bas' als voornaam wordt overgeslagen omdat het ook een gewoon woord is."""
         # Maar Bas staat op common list → skip. Dus geen anafoor.
         # Testcase: niet alle voornamen zijn common. Gebruik een niet-common.
-        mapping = {"Bas Stevens": "de CISO"}
-        tekst = "Bas Stevens werkt. De bas-gitaar is van Bas."
+        mapping = {"Kees Pieters": "de CISO"}
+        tekst = "Kees Pieters werkt. De kees-kaas is van Kees."
         # Ondanks dat Bas later staat, is Bas op common list dus geen anafoor
         assert "Bas" not in vind_anaforen(mapping, tekst)
 

@@ -24,3 +24,7 @@ testset/*
 # Backups van vervangingslijsten: bevatten de originele (PII-)waarden
 *.bak
 memory.json.*
+
+# Groundtruth van echte documenten bevat persoonsgegevens; alleen de synthetische set is publiek
+testset/*.groundtruth.json
+!testset/synth-edge-cases.md.groundtruth.json

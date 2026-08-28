@@ -99,7 +99,7 @@ class TestKVK:
 
 class TestFG:
     def test_basis(self):
-        assert "FG 000424" in _gevonden("FG 000424 Gemeente Leiden")
+        assert "FG 000999" in _gevonden("FG 000999 Gemeente Duinstad")
 
     def test_geen_match_bij_FG_zonder_nummer(self):
         # "FG" als rol-afkorting mag niet matchen zonder cijfers

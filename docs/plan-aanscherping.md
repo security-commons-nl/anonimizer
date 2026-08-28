@@ -61,7 +61,7 @@ Plug de gaten waar LLM's zwak zijn: gestructureerde identifiers.
 
 Alleen oppakken als testset na A–D aantoont dat het nodig is.
 
-- **E1**. Anafoor-linking: "Bas Stevens" → "de CISO" ook toepassen op losse "Bas"
+- **E1**. Anafoor-linking: "Kees Pieters" → "de CISO" ook toepassen op losse "Bas"
 - **E2**. Rol-contextualisering: `de [functietitel]` waar functie bekend
 - **E3**. Interne/externe organisatie-classifier met user-confirm
 
