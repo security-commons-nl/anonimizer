@@ -107,7 +107,7 @@ Reden: een ander die het document leest moet nog steeds snappen *wie met wie* pr
 
 Altijd vervangen. Standaard-patroon:
 
-- `jan.devries@leiden.nl` → `ciso@voorbeeldgemeente.nl`
+- `jan.devries@duinstad.nl` → `ciso@voorbeeldgemeente.nl`
 - `06-12345678` → `[telefoonnummer]`
 
 ### Locaties en dossiernummers
