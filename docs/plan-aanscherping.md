@@ -79,7 +79,7 @@ A (fundament) → B (regex) → C (LLM-prompt) → D (robuust) → E (context)
 
 - Precision/recall ≥ 0.95 / 0.90 op testset
 - Geen over-anonimisering van formulierlabels
-- Geen false positive op "Leiden" in "Leiderdorp"
+- Geen false positive op een plaatsnaam binnen een langere plaatsnaam (zoals "Ede" in "Edese")
 - PDF-extractie zonder mojibake voor de 2 PDFs
 - Audit-trail traceerbaar
 
