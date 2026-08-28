@@ -33,6 +33,7 @@ Heb je een geanonimiseerd beleidsdocument dat de detectiekwaliteit helpt meten?
 ### Nieuw detectiepatroon
 
 Wijzigingen in `patronen.py` vereisen een unit test in `tests/test_patronen.py`.
+Gedeelde PII-testgevallen horen in `tests/fixtures/pii-patronen.json`; dat bestand is de canonieke versie die anonimizer-browser en publicatiescan als kopie (met sha256) meedragen. Na een wijziging: kopieer het naar `anonimizer-browser/src/lib/fixtures/` en `publicatiescan/tests/fixtures/` en werk daar `pii-patronen.sha256` bij.
 
 ### Prompt- of flow-wijziging
 
