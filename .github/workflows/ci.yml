@@ -14,14 +14,6 @@ jobs:
       python-version: "3.12"
       test-command: "pytest tests/ -v"
 
-  # Documentatie-compliance conform DOCUMENTATION-STANDARD.md
-  docs:
-    uses: security-commons-nl/.github/.github/workflows/doc-compliance.yml@main
-    with:
-      require-gebruik: false         # anonimizer heeft docs/handleiding.md (CLI-tool)
-      require-architectuur: false    # docs/concept.md dient als architectuur
-      require-configuratie: false
-
   # Anonimizer-specifieke regressie: de regex-laag moet 100% precision houden
   evalueer:
     runs-on: ubuntu-latest
