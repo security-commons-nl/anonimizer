@@ -1,0 +1,19 @@
+{
+  "repoUrl": "https://github.com/security-commons-nl/anonimizer-local",
+  "title": "anonimizer-local · Security Commons NL",
+  "description": "De anonimizer als CLI: documenten in batch anonimiseren met hergebruik van eerdere keuzes, lokaal en zonder cloud.",
+  "siteTitle": "anonimizer-local",
+  "tabs": [
+    {
+      "file": "README.md",
+      "id": "start",
+      "label": "Start"
+    },
+    {
+      "file": "ROADMAP.md",
+      "id": "roadmap",
+      "label": "Roadmap",
+      "title": "Waar dit heen gaat"
+    }
+  ]
+}

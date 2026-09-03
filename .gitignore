@@ -28,3 +28,4 @@ memory.json.*
 # Groundtruth van echte documenten bevat persoonsgegevens; alleen de synthetische set is publiek
 testset/*.groundtruth.json
 !testset/synth-edge-cases.md.groundtruth.json
+dist/
